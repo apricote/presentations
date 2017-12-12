@@ -1,0 +1,305 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>reveal.js</title>
+
+  <link rel="stylesheet" href="css/reveal.css">
+  <link rel="stylesheet" href="css/theme/moon.css">
+
+  <!-- Theme used for syntax highlighting of code -->
+  <link rel="stylesheet" href="lib/css/atom-one-dark.css">
+  <style>
+    @import url(https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css);
+    .reveal code {
+      font-family: 'Fira Code', monospace;
+    }
+  </style>
+
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+    document.getElementsByTagName('head')[0].appendChild(link);
+  </script>
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section>
+        <h1>Asynchronous JavaScript</h1>
+        <h3>Experiences from my personal journey</h3>
+      </section>
+      <section>
+        <h3>Content</h3>
+        <ul>
+          <li>About me</li>
+          <li>Introduction</li>
+          <li>Callbacks</li>
+          <li>Promises</li>
+          <li>async/await</li>
+        </ul>
+      </section>
+      <section>
+        <h3>About me</h3>
+        <img src="https://www.gravatar.com/avatar/b1d145930b4db0d59a3d40df3688340f.jpg?s=200" alt="picture of me" />
+        <p>
+          Julian Tölle
+          <br> Developer @
+          <span style="color: #e74c3c">narando</span> &
+          <span style="color: #f2f2f2">TrackCode</span>
+          <br> Backend Development & Devops
+          <br> Javascript for 13 months
+        </p>
+      </section>
+      <section>
+        <section>
+          <h3>Introduction</h3>
+          <p>
+            Node.js and JavaScript are:
+            <ul>
+              <li>single-threaded</li>
+              <li>event-driven</li>
+              <li>non-blocking</li>
+            </ul>
+          </p>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h3>Callbacks</h3>
+          <div style="display: flex">
+            <ul>Pros:
+              <li>supported everywhere</li>
+              <li>used in Node.js standard library and most packages</li>
+            </ul>
+            <ul>Cons:
+              <li>hard to keep track of current context
+                <small>(callback hell)</small>
+              </li>
+              <li>decentralized error handling</li>
+            </ul>
+          </div>
+        </section>
+        <section>
+          <h3>Callbacks</h3>
+          <h4>Example</h4>
+          <pre><code class="js" data-trim>
+              import fs from "fs";
+              
+              fs.readFile("config.txt", (err, config) => {
+                if(err) {
+                  console.error(err);
+                  return;
+                }
+
+                console.log(config);
+              });
+
+              console.log("Hello World!");
+            </code></pre>
+
+        </section>
+        <section>
+          <h3>Callbacks</h3>
+          <h4>Callback Hell</h4>
+          <pre><code class="js" data-trim>
+                var p_client = new Db("integration_tests_20");
+                p_client.open((err, p_client) => {
+                  p_client.dropDatabase((err, done) => {
+                    collection.insert({ a: 1 }, (err, docs) => {
+                      collection.find({ name: "Donald" }, (err, cursor) => {
+                        cursor.toArray((err, items) => {
+                          test.assertEquals(1, items.length);
+                
+                          // Let's close the db​
+                          p_client.close();
+                        });
+                      });
+                    });
+                  });
+                });                
+            </code></pre>
+
+        </section>
+      </section>
+      <section>
+        <section>
+          <h3>Promises</h3>
+          <div style="display: flex">
+            <ul>Pros:
+              <li>supported mostly everywhere
+                <small>no IE11</small>
+              </li>
+              <li>error handling</li>
+            </ul>
+            <ul>Cons:
+              <li>no variable passthrough</li>
+              <li>only slightly less verbose</li>
+            </ul>
+          </div>
+        </section>
+        <section>
+          <h3>Promises</h3>
+          <h4>Example</h4>
+          <pre><code class="js" data-trim>
+              fetch("https://api.coindesk.com/v1/bpi/currentprice.json")
+                .then(res => res.json())
+                .then(res => res.bpi.USD.rate_float)
+                .then(rate => console.log(`Current BTC/USD Rate: ${rate}`))
+                .catch(err => console.error(err));
+            </code></pre>
+        </section>
+        <section>
+          <h3>Asynchronicity</h3>
+          <h4>with promises
+            <small>Pattern</small>
+          </h4>
+          <pre><code class="js" data-trim>
+              // Parallel Execution
+              Promise.all(
+                fetch("https://api.coindesk.com/v1/bpi/currentprice.json"),
+                fetch("https://api.coindesk.com/v1/bpi/historical/close.json")
+              ).then(([currentPrice, historicalPrices]) =>
+                console.log(currentPrice, historicalPrices)
+              ).catch(err => console.error(err));
+            </code></pre>
+        </section>
+        <section>
+          <h3>Promises</h3>
+          <h4>The ugly side</h4>
+          <pre><code class="js" data-trim>
+              // Variable Passthrough
+              User.findOne({ name: "realDonaldTrump" })
+              .then(user => Promise.all(user, Tweets.find({ user_id: user.id })))
+              .then(([user, tweets]) => {
+                console.log(`User ${user.name} has ${tweets.length} tweets`);
+              });
+            </code></pre>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h3>async/await</h3>
+          <div style="display: flex">
+            <ul>Pros:
+              <li>easy adoption in promise-based code</li>
+              <li>natural error handling</li>
+            </ul>
+            <ul>Cons:
+              <li>only supported since Node 7.6</li>
+            </ul>
+          </div>
+        </section>
+        <section>
+          <h3>async/await</h3>
+          <h4>Example</h4>
+          <pre><code class="js" data-trim>
+              async function getBtcRate() {
+                try {
+                  const res = await fetch("https://api.coindesk.com/v1/bpi/currentprice.json");
+                  const currentPrice = await res.json();
+                  const rate = res.bpi.USD.rate_float;
+    
+                  console.log(`Current BTC/USD Rate: ${rate}`)
+                } catch (err) {
+                  console.error(err);
+                }
+              }
+            </code></pre>
+        </section>
+        <section>
+          <h3>async/await</h3>
+          <h4>Pattern: Parallel Execution</h4>
+          <pre><code class="js" data-trim>
+              // Parallel Execution
+              async function getBtcData() {
+                try {
+                  const [currentPrice, historicalPrices] = await Promise.all(
+                    fetch("https://api.coindesk.com/v1/bpi/currentprice.json"),
+                    fetch("https://api.coindesk.com/v1/bpi/historical/close.json")
+                  )
+                  
+                  console.log(currentPrice, historicalPrices)
+                } catch (err) {
+                  console.error(err);
+                }
+              }
+            </code></pre>
+        </section>
+        <section>
+          <h3>async/await</h3>
+          <h4>Pattern: Keeping Context</h4>
+          <pre><code class="js" data-trim>
+              // Don't loose access to previous results
+              async function getUserTweets({ username }) {
+                try {
+                  const user = await User.findOne({ name: username });
+                  const tweets = await Tweets.find({ user_id: user.id });
+  
+                  console.log(`User ${user.name} has ${tweets.length} tweets`);
+                } catch (err) {
+                  console.error(err);
+                }
+              }
+            </code></pre>
+        </section>
+        <section>
+          <h3>async/await</h3>
+          <h4>Pattern: Functional Programming</h4>
+          <pre><code class="js" data-trim>
+              // Mixing async/await with FP
+              async function getUserTweets({ users }) {
+                try {
+                  const tweets = await Promise.all(
+                    users.map(user => Tweets.find({ user_id: user.id }))
+                  );
+              
+                  console.log(`A total of ${tweets.length} tweets for ${users.length} users has been returned`);
+                  return tweets;
+                } catch (err) {
+                  console.error(err);
+                }
+              }
+            </code></pre>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h3>Summary</h3>
+          <h5>Callbacks</h5>
+          <p>supported by standard library</p>
+          <h5>Promises</h5>
+          <p>foundation for async/await</p>
+          <h5>async/await</h5>
+          <p>most clear and simple code</p>
+        </section>
+      </section>
+    </div>
+  </div>
+
+  <script src="lib/js/head.min.js"></script>
+  <script src="js/reveal.js"></script>
+
+  <script>
+    // More info about config & dependencies:
+    // - https://github.com/hakimel/reveal.js#configuration
+    // - https://github.com/hakimel/reveal.js#dependencies
+    Reveal.initialize({
+      controlsTutorial: false,
+      center: false,
+      history: true,
+      dependencies: [
+        { src: 'plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } }
+      ]
+    });
+  </script>
+</body>
+
+</html>
