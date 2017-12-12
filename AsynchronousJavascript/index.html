@@ -163,10 +163,10 @@
           </h4>
           <pre><code class="js" data-trim>
               // Parallel Execution
-              Promise.all(
+              Promise.all([
                 fetch("https://api.coindesk.com/v1/bpi/currentprice.json"),
                 fetch("https://api.coindesk.com/v1/bpi/historical/close.json")
-              ).then(([currentPrice, historicalPrices]) =>
+              ]).then(([currentPrice, historicalPrices]) =>
                 console.log(currentPrice, historicalPrices)
               ).catch(err => console.error(err));
             </code></pre>
@@ -177,7 +177,7 @@
           <pre><code class="js" data-trim>
               // Variable Passthrough
               User.findOne({ name: "realDonaldTrump" })
-              .then(user => Promise.all(user, Tweets.find({ user_id: user.id })))
+              .then(user => Promise.all([user, Tweets.find({ user_id: user.id })]))
               .then(([user, tweets]) => {
                 console.log(`User ${user.name} has ${tweets.length} tweets`);
               });
@@ -221,10 +221,10 @@
               // Parallel Execution
               async function getBtcData() {
                 try {
-                  const [currentPrice, historicalPrices] = await Promise.all(
+                  const [currentPrice, historicalPrices] = await Promise.all([
                     fetch("https://api.coindesk.com/v1/bpi/currentprice.json"),
                     fetch("https://api.coindesk.com/v1/bpi/historical/close.json")
-                  )
+                  ])
                   
                   console.log(currentPrice, historicalPrices)
                 } catch (err) {
