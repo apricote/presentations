@@ -1,0 +1,539 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>Functional Programming</title>
+
+  <link rel="stylesheet" href="css/reveal.css">
+  <link rel="stylesheet" href="css/theme/moon.css">
+  <link rel="shortcut icon" href="lib/favicon.ico">
+
+  <!-- Theme used for syntax highlighting of code -->
+  <link rel="stylesheet" href="lib/css/atom-one-dark.css">
+  <style>
+    @import url(https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css);
+    .reveal code {
+      font-family: 'Fira Code', monospace;
+    }
+  </style>
+
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+    document.getElementsByTagName('head')[0].appendChild(link);
+  </script>
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section>
+        <h1>Functional Programming</h1>
+        <h3>in Javascript</h3>
+      </section>
+      <section>
+        <h3>Content</h3>
+        <ul>
+          <li>About me</li>
+          <li>The Problem</li>
+          <li>What is FP?</li>
+          <li>Terminology</li>
+          <li>Use Cases</li>
+          <li>Standard Library</li>
+          <li>External Modules</li>
+        </ul>
+      </section>
+      <section>
+        <h3>About me</h3>
+        <img src="https://www.gravatar.com/avatar/b1d145930b4db0d59a3d40df3688340f.jpg?s=200" alt="picture of me" />
+        <p>
+          Julian Tölle
+          <br> Developer @
+          <span style="color: #e74c3c">narando</span> &
+          <span style="color: #f2f2f2">TrackCode</span>
+          <br> Backend Development & Devops
+          <br> Javascript for 16 months
+        </p>
+      </section>
+      <section>
+        <section>
+          <h3>The Problem</h3>
+          <pre><code class="js" data-trim>
+            getNestedValue({ foo: 1 }, 'foo') // 1
+            getNestedValue({ foo: { bar: 2 } }, 'foo.bar') // 2
+            getNestedValue({ hello: 'world' }, 'foo.bar') // undefined
+          </code></pre>
+        </section>
+        <section>
+          <h3>The Problem</h3>
+          <pre><code class="js" data-trim>
+              function getNestedValue(object, propertyName) {
+                if (!propertyName) throw new Error("Impossible to set null property");
+                
+                const parts = propertyName.split(".");
+                const len = parts.length;
+                let subObject = object;
+                let i;
+              
+                for (i = 0; i < len; i++) {
+                  if (!subObject || typeof subObject === "undefined") return undefined;
+                  subObject = subObject[parts[i]];
+                }
+
+                return subObject;
+              }
+          </code></pre>
+        </section>
+        <section>
+          <h3>The Problem</h3>
+          <pre><code class="js" data-trim>
+            const parts = propertyName.split(".");
+            const len = parts.length;
+            let subObject = object;
+            let i;
+          </code></pre>
+          <ul>
+            <li>multiple temporary variables</li>
+            <li>occupying "mind-estate"</li>
+          </ul>
+        </section>
+        <section>
+          <h3>The Problem</h3>
+          <pre><code class="js" data-trim>
+              for (i = 0; i < len; i++) {
+                if (!subObject || typeof subObject === "undefined") return undefined;
+                subObject = subObject[parts[i]];
+              }
+          </code></pre>
+          <ul>
+            <li>changing state</li>
+            <li>hard to reason about</li>
+          </ul>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h3>What is FP?</h3>
+          <ul>
+            <li>programming paradigm</li>
+            <li>evaluation of mathematical
+              <em>functions</em>
+            </li>
+            <li>functions are treated like values</li>
+          </ul>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h3>Terminology</h3>
+          <h4>First-Class Functions</h4>
+          <ul>
+            <li>treating functions the same as other values
+              <br>(
+              <code>Object</code>,
+              <code>Number</code>,
+              <code>String</code>,
+              <code>Boolean</code>)</li>
+            <li>function definition is allowed where a value is expected</li>
+          </ul>
+          <pre><code class="js" data-trim>const sum = (a, b) => a + b</code></pre>
+          <pre><code class="js" data-trim>
+                const object = {
+                  foo: 1,
+                  bar: true,
+                  baz: sum
+                }
+              </code></pre>
+        </section>
+        <section>
+          <h3>Terminology</h3>
+          <h4>Higher-Order Functions</h4>
+          <ul>
+            <li>takes a function as a parameter || returns a function</li>
+            <li>callbacks</li>
+          </ul>
+          <pre><code class="js" data-trim>
+              const add3 = v => v + 3;
+              const twice = (f) => (v) => f(f(v));
+
+              // Call directly
+              twice(add3)(3); // 9
+
+              // Store as value
+              const add6 = twice(add3);
+              add6(3); // 9
+
+              const add12 = twice(twice)(add3);
+              add12(3); // 15
+          </code></pre>
+        </section>
+        <section>
+          <h3>Terminology</h3>
+          <h4>Side Effect</h4>
+          <ul>
+            <li>mutating state outside of the scope</li>
+            <li>modifying a global variable</li>
+            <li>observable effect on the outside world</li>
+            <li>order matters</li>
+          </ul>
+          <pre><code class="js" data-trim>
+            // mutating state
+            let counter = 0;
+            const inc = () => counter += 1;
+            
+            // observable effect
+            const log = data => console.log(data);
+
+            // Order changes the result
+            const fs = require('fs');
+            fs.readFileSync('./foo.txt') // "Hello World!";
+            fs.writeFileSync('./foo.txt', "Bar!");
+            fs.readFileSync('./foo.txt') // "Bar!"
+          </code></pre>
+        </section>
+        <section>
+          <h3>Terminology</h3>
+          <h4>Pure Function</h4>
+          <ul>
+            <li>no side effects</li>
+            <li>same parameters => same results</li>
+            <li>examples: sha1, Math.sin, </li>
+          </ul>
+          <pre><code class="js" data-trim>
+              const add3 = v => v + 3;
+
+              add3(3); // 6
+              add3(3); // 6
+              
+              Math.sin(Math.PI / 4) // ~= 0.707
+              Math.sin(Math.PI / 4) // ~= 0.707
+            </code></pre>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h3>Use Cases</h3>
+          Let's try improving the code from earlier!
+          <pre><code class="js" data-trim>
+              function getNestedValue(object, propertyName) {
+                if (!propertyName) throw new Error("Impossible to set null property");
+                
+                const parts = propertyName.split(".");
+                const len = parts.length;
+                let subObject = object;
+                let i;
+              
+                for (i = 0; i < len; i++) {
+                  if (!subObject || typeof subObject === "undefined") return undefined;
+                  subObject = subObject[parts[i]];
+                }
+
+                return subObject;
+              }
+          </code></pre>
+
+        </section>
+        <section>
+          <h3>Use Cases</h3>
+          Replace the loop with
+          <code class="js">Array.prototype.forEach</code>
+          <pre><code class="js" data-trim>
+            function getNestedValue(object, propertyName) {
+              if (!propertyName) throw new Error("Impossible to set null property");
+            
+              const parts = propertyName.split(".");
+              // const len = parts.length;
+              let subObject = object;
+              // let i;
+            
+              parts.forEach(part => {
+                if (!subObject || typeof subObject === "undefined") return undefined;
+                subObject = subObject[part];
+              });
+            
+              return subObject;
+            }
+          </code></pre>
+        </section>
+        <section>
+          <h3>Use Cases</h3>
+          Remove the side-effect by using
+          <code class="js">Array.prototype.reduce</code>
+          <pre><code class="js" data-trim>
+              function getNestedValue(object, propertyName) {
+                if (!propertyName) throw new Error("Impossible to set null property");
+              
+                const parts = propertyName.split(".");
+                // let subObject = object;                
+                // parts.forEach(part => {
+                //   if (!subObject || typeof subObject === "undefined") return undefined;
+                //   subObject = subObject[part];
+                // });
+              
+                const nestedValue = parts.reduce((object, part) => {
+                  if (!object || typeof object === "undefined") return undefined;
+                  return object[part];
+                }, object);
+                return nestedValue;
+              }              
+            </code></pre>
+
+        </section>
+        <section>
+          <h3>Use Cases</h3>
+          Extract the
+          <em>reducer function</em>
+          <code class="js">Array.prototype.reduce</code>
+          <pre><code class="js" data-trim>
+              function getValue(object, propertyName) {
+                if (!propertyName) throw new Error("Impossible to set null property");
+              
+                if (!object || typeof object === "undefined") return undefined;
+                return object[propertyName];
+              }
+              
+              function getNestedValue(object, propertyName) {
+                const parts = propertyName.split(".");
+              
+                const nestedValue = parts.reduce(getValue, object);
+              
+                return nestedValue;
+              }
+              </code></pre>
+
+        </section>
+        <section>
+          <h3>Use Cases</h3>
+          Get rid of unnecessary code
+          <pre><code class="js" data-trim>
+                function getValue(object, propertyName) {
+                  if (!propertyName) throw new Error("Impossible to set null property");
+                
+                  return typeof object === "undefined" ? undefined : object[propertyName];
+                }
+                
+                function getNestedValue(object, propertyName) {
+                  return propertyName.split(".").reduce(getValue, object);                
+                }
+                </code></pre>
+
+        </section>
+      </section>
+
+      <section>
+        <section>
+          <h3>Standard Library</h3>
+          <h4>
+            <code class="js">Array.prototype.{function}</code>
+          </h4>
+          <ul>
+            <li>
+              <code>forEach</code>
+            </li>
+            <li>
+              <code>filter</code>
+            </li>
+            <li>
+              <code>map</code>
+            </li>
+            <li>
+              <code>reduce</code>
+            </li>
+          </ul>
+        </section>
+        <section>
+          <h3>Standard Library</h3>
+          <h4>
+            <code>Array.prototype.forEach</code>
+          </h4>
+          <pre><code class="js" data-trim>
+            const elements = ["a", "b", "c"];
+
+            for(let i = 0; i < elements.length; i++) {
+              console.log(elements[i]);
+            }
+
+            // functional equivalent
+            elements.forEach(element => console.log(element));
+          </code></pre> Mostly used for side-effects
+        </section>
+        <section>
+          <h3>Standard Library</h3>
+          <h4>
+            <code>Array.prototype.filter</code>
+          </h4>
+          <pre><code class="js" data-trim>
+              const elements = [5, 10, 7];
+    
+              const predicateEven = num => num % 2;
+              const predicateAboveEight = num => num > 8;
+
+              elements.filter(predicateEven); // [5, 7]
+              elements.filter(predicateAboveEight) // [10]
+            </code></pre>
+        </section>
+
+        <section>
+          <h3>Standard Library</h3>
+          <h4>
+            <code>Array.prototype.map</code>
+          </h4>
+          Convert a value into another one
+          <pre><code class="js" data-trim>
+              // Simple Example
+              const elements = [5, 10, 7];
+              const timesTwo = num => num * 2;
+              elements.map(timesTwo); // [10, 20, 14]
+              
+              // Advanced Example
+              const users = [
+                { name: "Donald", username: "realDonaldTrump" },
+                { name: "Hillary", username: "HillaryClinton" },
+                { name: "Barack", username: "BarackObama" }
+              ];
+              
+              const usernames = users.map(user => user.username);
+              // ["realDonaldTrump", "HillaryClinton", "BarackObama"]
+              </code></pre>
+        </section>
+        <section>
+          <h3>Standard Library</h3>
+          <h4>
+            <code>Array.prototype.reduce</code>
+          </h4>
+          Combine multiple elements into an aggregate
+          <pre><code class="js" data-trim>
+                const elements = [5, 10, 7];
+
+                const sum = (a, b) => a + b;
+                elements.reduce(sum, 0); // 22
+                
+                const max = (a, b) => Math.max(a, b);
+                elements.reduce(max, -Infinity); // 10
+
+
+                </code></pre>
+        </section>
+        <section>
+          <h3>Standard Library</h3>
+          <h4>
+            <code>Chaining</code>
+          </h4>
+          <pre><code class="js" data-trim>
+            const users = [
+              { name: "Donald", username: "realDonaldTrump", president: true },
+              { name: "Hillary", username: "HillaryClinton", president: false },
+              { name: "Barack", username: "BarackObama", president: false }
+            ];
+            
+            const isPresident = user => user.president;
+            const introduceUser = user => `Hi! My name is ${user.name} and my Twitter is @${user.username}`;
+            const log = msg => console.log(msg);
+            
+            users
+              .filter(isPresident)
+              .map(introduceUser)
+              .forEach(log);
+            //  Hi! My name is Donald and my Twitter is @realDonaldTrump
+                </code></pre>
+        </section>
+
+
+      </section>
+      <section>
+        <section>
+          <h3>External Modules</h3>
+          <ul>
+            <li>Immutable.js</li>
+            <li>Ramda</li>
+          </ul>
+        </section>
+        <section>
+          <h3>External Modules</h3>
+          <h4>Immutable.js</h4>
+          <ul>
+            <li>build by Facebook</li>
+            <li>Persistent Data Structures</li>
+            <li>implements
+              <code>Map</code>,
+              <code>Set</code>,
+              <code>List</code>
+            </li>
+            <li>keep old object, return new object</li>
+          </ul>
+        </section>
+        <section>
+          <h3>External Modules</h3>
+          <h4>Immutable.js</h4>
+
+          <pre><code class="js">
+            const numbers = [1, 2, 3];
+            numbers.push(4); // numbers modified
+            numbers; // [1, 2, 3, 4];
+
+            const { List } = require('immutable');
+            const immutableNumbers = new List([1, 2, 3]);
+            immutableNumbers.push(4); // [1, 2, 3, 4]
+            immutableNumbers; // [1, 2, 3]
+
+            // Functions from earlier still work
+            immutableNumbers.map(x => x * x); // [1, 4, 9]
+          </code></pre>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h3>References & Further Links</h3>
+          <ul>
+            <li>
+              <a href="https://www.redotheweb.com/2015/09/18/declarative-imperative-js.html">https://www.redotheweb.com/2015/09/18/declarative-imperative-js.html</a>
+            </li>
+            <li>
+              <a href="https://en.wikipedia.org/wiki/Functional_programming">https://en.wikipedia.org/wiki/Functional_programming</a>
+            </li>
+            <li>
+              <a href="https://hackernoon.com/javascript-and-functional-programming-an-introduction-286aa625e26d">https://hackernoon.com/javascript-and-functional-programming-an-introduction-286aa625e26d</a>
+            </li>
+            <li>
+              <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array</a>
+            </li>
+            <li>
+              <a href="https://facebook.github.io/immutable-js/">https://facebook.github.io/immutable-js/</a>
+            </li>
+            <li>
+              <a href="https://github.com/ramda/ramda">https://github.com/ramda/ramda</a>
+            </li>
+            <li>
+              <a href="http://elm-lang.org/">http://elm-lang.org/</a>
+            </li>
+          </ul>
+        </section>
+      </section>
+    </div>
+  </div>
+
+  <script src=" lib/js/head.min.js "></script>
+  <script src="js/reveal.js "></script>
+
+  <script>
+    // More info about config & dependencies:
+    // - https://github.com/hakimel/reveal.js#configuration
+    // - https://github.com/hakimel/reveal.js#dependencies
+    Reveal.initialize({
+      controlsTutorial: false,
+      center: false,
+      history: true,
+      dependencies: [
+        { src: 'plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } }
+      ]
+    });
+  </script>
+</body>
+
+</html>
