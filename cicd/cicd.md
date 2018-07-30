@@ -1,6 +1,6 @@
-# CI/CD at TrackCode
+# CI/CD @ TrackCode
 
-### Using Jenkins, Helm and Kubernetes
+### Using Jenkins, Helm & Kubernetes
 
 ---
 
@@ -10,7 +10,7 @@
 - Definition of CI/CD
 - Existing Stack
 - Implementation
-- Pros and Cons
+- Pros & Cons
 - Whats next?
 
 ---
@@ -21,7 +21,17 @@
 
 Julian Tölle  
 Developer @ <span style="color: #e74c3c">narando</span> & <span style="color: #f2f2f2">TrackCode</span>  
-Backend Development & Devops
+Backend Development & DevOps
+
+--
+
+### About us
+
+![TrackCode Logo](./about-me-trackcode-logo.png) <!-- .element style="background-color: #ffffff" -->
+
+- ~ 5 Employees
+- Last-mile scanning solution for logistics
+- Nodejs + React
 
 ---
 
@@ -124,7 +134,7 @@ ssh jenkins@SERVICE-MACHINE "./deploy.sh production"
 1.  Merge
 1.  Deployment is triggered
 
---
+---
 
 ### Implementation / Build
 
@@ -149,9 +159,9 @@ ssh jenkins@SERVICE-MACHINE "./deploy.sh production"
 
 ![Jenkins Blue Ocean](./build-jenkins-blue-ocean.png)
 
---
+---
 
-### Implemenation / Deployment
+### Implementation / Deployment
 
 - Defined in same `Jenkinsfile`
 - Executed when `branch IN (master, dev)`
@@ -176,8 +186,6 @@ ssh jenkins@SERVICE-MACHINE "./deploy.sh production"
 
 - Render Helm Chart to Kubernetes Manifest
 - Apply Manifest against cluster
-- ???
-- Profit!
 
 --
 
@@ -211,7 +219,7 @@ app-web
 
 ---
 
-## Pros and Cons
+## Pros & Cons
 
 ### Pros
 
@@ -222,14 +230,14 @@ app-web
 
 --
 
-## Pros and Cons
+## Pros & Cons
 
 ### Cons
 
 - Dependency on local tools
   - `kubectl`, `helm`, `docker`, `npm`, `node`
 - Leftover build artifacts
-- Groovy is more verbose than necessary
+- Groovy is unnecessarily verbose
 - Missing clean up of orphaned k8s resources
 
 ---
