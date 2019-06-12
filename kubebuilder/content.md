@@ -12,7 +12,42 @@
 
 ---
 
-## CRDs
+## CRD's
+
+- introduced in Kubernetes 1.7
+- replacing "third party ressources"
+- enables users to create own Kubernetes Objects
+- can be used like any other object
+
+--
+
+<!--### Costum Resource
+
+- allows to add objects to Kubernetes API
+- allows to create own API
+
+-- -->
+
+## Resources and Kinds
+
+> "A resource is an endpoint in the Kubernetes API that stores a collection of API objects of a certain kind."
+
+- [Costum Resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
+
+--
+
+## Kinds
+
+- API types
+- called "Kinds"
+- e.g. Pod, Deployment etc.
+
+--
+
+## Resources
+
+- use of a "Kind"
+- Pod resource holds Pod Objects
 
 ---
 
@@ -66,6 +101,36 @@
 ---
 
 ## Kubebuilder
+
+> "Kubebuilder is a framework for building Kubernetes APIs using custom resource definitions (CRDs)."
+
+- [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder)
+
+--
+
+## Kubebuilder
+
+- First release in March 2018
+- Version 2.0.0 five days ago
+
+--
+
+## Kubebuilder
+
+### Motivation
+
+- need to create a lot of files
+- need to create much boilerplate code
+
+--
+
+## Kubebuilder
+
+### What Kubebuilder is doing..
+
+- generates the whole project
+- CRD's, RBAC settings, tests etc.
+- so you can focus on your use case
 
 ---
 
